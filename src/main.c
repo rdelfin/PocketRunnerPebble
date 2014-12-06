@@ -18,6 +18,8 @@ static BitmapLayer *top_button_layer;
 static BitmapLayer *middle_button_layer;
 static BitmapLayer *bottom_button_layer;
 
+static GFont large_time_font;
+
 int main(void) {
   init();
   app_event_loop();
@@ -45,10 +47,12 @@ static void init() {
 }
 
 static void main_window_load(Window *window) {
-    //Set fullscreen
+    //Font
+    large_time_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_VCR_OSD_NUMERIC_24));
+    
     
     // Create time TextLayer
-    s_time_layer = text_layer_create(GRect(0, 55, 144, 50));
+    s_time_layer = text_layer_create(GRect(0, 40, 127, 50));
     text_layer_set_background_color(s_time_layer, GColorClear);
     text_layer_set_text_color(s_time_layer, GColorBlack);
     
@@ -85,7 +89,7 @@ static void main_window_load(Window *window) {
     mytimer_set_timer_text(0, 0, 0);
 
     // Improve the layout to be more like a watchface
-    text_layer_set_font(s_time_layer, fonts_get_system_font(FONT_KEY_ROBOTO_CONDENSED_21));
+    text_layer_set_font(s_time_layer, large_time_font);
     text_layer_set_text_alignment(s_time_layer, GTextAlignmentCenter);
 
     // Add it as a child layer to the Window's root layer
@@ -106,7 +110,7 @@ static void main_window_unload(Window *window) {
     bitmap_layer_destroy(top_button_layer);
     bitmap_layer_destroy(middle_button_layer);
     bitmap_layer_destroy(bottom_button_layer);
-    
+    fonts_unload_custom_font(large_time_font);
 }
 
 static void deinit() {

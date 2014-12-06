@@ -9,6 +9,12 @@
     "resources": {
         "media": [
             {
+                "characterRegex": "[0-9:. ]",
+                "file": "fonts/VCR_OSD_MONO.ttf",
+                "name": "VCR_OSD_NUMERIC_24",
+                "type": "font"
+            },
+            {
                 "file": "images/bottom_button.png",
                 "name": "BOTTOM_BUTTON_IMG",
                 "type": "png"
