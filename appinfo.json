@@ -9,6 +9,12 @@
     "resources": {
         "media": [
             {
+                "characterRegex": "[\\/0-9a-zA-Z:. ]",
+                "file": "fonts/VCR_OSD_MONO.ttf",
+                "name": "VCR_OSD_ALPHANUMERIC_20",
+                "type": "font"
+            },
+            {
                 "characterRegex": "[0-9:. ]",
                 "file": "fonts/VCR_OSD_MONO.ttf",
                 "name": "VCR_OSD_NUMERIC_24",

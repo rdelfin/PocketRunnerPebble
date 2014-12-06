@@ -9,6 +9,8 @@ static void main_window_unload(Window *window);
 
 static Window *s_main_window;
 static TextLayer *s_time_layer;
+static TextLayer *lap_count_layer;
+static TextLayer *completed_layer;
 static GBitmap *right_bar_bitmap;
 static GBitmap *top_button_bitmap;
 static GBitmap *middle_button_bitmap;
@@ -19,6 +21,7 @@ static BitmapLayer *middle_button_layer;
 static BitmapLayer *bottom_button_layer;
 
 static GFont large_time_font;
+static GFont medium_time_font;
 
 int main(void) {
   init();
@@ -49,13 +52,29 @@ static void init() {
 static void main_window_load(Window *window) {
     //Font
     large_time_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_VCR_OSD_NUMERIC_24));
+    medium_time_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_VCR_OSD_ALPHANUMERIC_20));
     
     
     // Create time TextLayer
     s_time_layer = text_layer_create(GRect(0, 40, 127, 50));
     text_layer_set_background_color(s_time_layer, GColorClear);
     text_layer_set_text_color(s_time_layer, GColorBlack);
+    text_layer_set_font(s_time_layer, large_time_font);
+    text_layer_set_text_alignment(s_time_layer, GTextAlignmentCenter);
     
+    //Create Lap TextLayer
+    lap_count_layer = text_layer_create(GRect(0, 80, 127, 50));
+    text_layer_set_background_color(lap_count_layer, GColorClear);
+    text_layer_set_text_color(lap_count_layer, GColorBlack);
+    text_layer_set_font(lap_count_layer, medium_time_font);
+    text_layer_set_text_alignment(lap_count_layer, GTextAlignmentCenter);
+    
+    //Create completed TextLayer
+    completed_layer = text_layer_create(GRect(0, 110, 127, 50));
+    text_layer_set_background_color(completed_layer, GColorClear);
+    text_layer_set_text_color(completed_layer, GColorBlack);
+    text_layer_set_font(completed_layer, medium_time_font);
+    text_layer_set_text_alignment(completed_layer, GTextAlignmentCenter);
     
     
     //Load bitmap and layer for right bar and buttons
@@ -87,13 +106,18 @@ static void main_window_load(Window *window) {
     
     //Display time zero
     mytimer_set_timer_text(0, 0, 0);
-
-    // Improve the layout to be more like a watchface
-    text_layer_set_font(s_time_layer, large_time_font);
-    text_layer_set_text_alignment(s_time_layer, GTextAlignmentCenter);
-
+    
+    //Display zero laps
+    text_layer_set_text(lap_count_layer, "0 laps");
+    
+    //Display zero distance
+    text_layer_set_text(completed_layer, "00km/00km");
+   
+    
     // Add it as a child layer to the Window's root layer
     layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_time_layer));
+    layer_add_child(window_get_root_layer(window), text_layer_get_layer(lap_count_layer));
+    layer_add_child(window_get_root_layer(window), text_layer_get_layer(completed_layer));
     layer_add_child(window_get_root_layer(window), bitmap_layer_get_layer(right_bar_layer));
     layer_add_child(window_get_root_layer(window), bitmap_layer_get_layer(top_button_layer));
     layer_add_child(window_get_root_layer(window), bitmap_layer_get_layer(middle_button_layer));
@@ -102,6 +126,8 @@ static void main_window_load(Window *window) {
 
 static void main_window_unload(Window *window) {
     text_layer_destroy(s_time_layer);
+    text_layer_destroy(lap_count_layer);
+    text_layer_destroy(completed_layer);
     gbitmap_destroy(right_bar_bitmap);
     gbitmap_destroy(top_button_bitmap);
     gbitmap_destroy(middle_button_bitmap);
