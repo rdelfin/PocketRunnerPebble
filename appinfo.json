@@ -1,0 +1,19 @@
+{
+    "appKeys": {},
+    "capabilities": [
+        ""
+    ],
+    "companyName": "ricardo.delfin.garcia@gmail.co",
+    "longName": "Pocket Runner",
+    "projectType": "native",
+    "resources": {
+        "media": []
+    },
+    "shortName": "Pocket Runner",
+    "uuid": "274d5bb8-b7b8-4ff9-b3f2-9b32cee39ad6",
+    "versionCode": 1,
+    "versionLabel": "1.0",
+    "watchapp": {
+        "watchface": false
+    }
+}
