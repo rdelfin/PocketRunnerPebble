@@ -7,7 +7,28 @@
     "longName": "Pocket Runner",
     "projectType": "native",
     "resources": {
-        "media": []
+        "media": [
+            {
+                "file": "images/bottom_button.png",
+                "name": "BOTTOM_BUTTON_IMG",
+                "type": "png"
+            },
+            {
+                "file": "images/middle_button.png",
+                "name": "MIDDLE_BUTTON_IMG",
+                "type": "png"
+            },
+            {
+                "file": "images/top_button.png",
+                "name": "TOP_BUTTON_IMG",
+                "type": "png"
+            },
+            {
+                "file": "images/right_bar.png",
+                "name": "RIGHT_BAR_IMG",
+                "type": "png"
+            }
+        ]
     },
     "shortName": "Pocket Runner",
     "uuid": "274d5bb8-b7b8-4ff9-b3f2-9b32cee39ad6",
