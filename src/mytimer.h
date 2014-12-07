@@ -1,3 +1,5 @@
+#include <pebble.h>
+
 #pragma once
 
 static TextLayer* mytimer_text_layer;
