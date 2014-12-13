@@ -1,4 +1,3 @@
-#include <pebble.h>
 #include "mytimer.h"
 
 
@@ -7,8 +6,7 @@ void mytimer_set_text_label(TextLayer* text_layer) {
 }
     
 void mytimer_start_timer() {
-    mytimer_timer = app_timer_register(1000, (AppTimerCallback)mytimer_timer_callback, NULL);
-    mytimer_runTimer = true;
+    mytimer_resume_timer();
     mytimer_count = 0;
 }
 
@@ -16,30 +14,47 @@ void mytimer_stop_timer() {
     mytimer_runTimer = false;    
 }
 
-void mytimer_timer_callback(void* data) {
-    //Delay next call for 1s
-    mytimer_timer = app_timer_register(1000, (AppTimerCallback)mytimer_timer_callback, NULL);
-    
-    //Add time and display
-    mytimer_count++;
-    
-    int seconds = mytimer_count % 60;
-    int minutes  = (mytimer_count / 60) % 60;
-    int hours = (mytimer_count / 3600);
-    
-    mytimer_set_timer_text(seconds, minutes, hours);
+void mytimer_resume_timer() {
+    mytimer_timer = app_timer_register(INTERVAL_TIME, (AppTimerCallback)mytimer_timer_callback, NULL);
+    mytimer_runTimer = true;
 }
 
-void mytimer_set_timer_text(int seconds, int minutes, int hours) {
+void mytimer_timer_callback(void* data) {
+    if(mytimer_runTimer) {
+        //Delay next call for INTERVAL_TIME milliseconds
+        mytimer_timer = app_timer_register(INTERVAL_TIME, (AppTimerCallback)mytimer_timer_callback, NULL);
+        
+        //Add time and display
+        mytimer_count++;
+        
+        //Only update every second
+        if(mytimer_count % (1000 / INTERVAL_TIME) == 0) {
+            mytimer_set_timer_text(counterToMyTime(mytimer_count, INTERVAL_TIME));
+        }
+    }
+}
+
+void mytimer_set_timer_text(MyTime myTime) {
     static char bufferSeconds[5];
     static char bufferMinutes[5];
     static char bufferHours[5];
-    snprintf(bufferSeconds, 5, "%02d", seconds);
-    snprintf(bufferMinutes, 5, "%02d", minutes);
-    snprintf(bufferHours, 5, "%d", hours);
+    snprintf(bufferSeconds, 5, "%02d", myTime.seconds);
+    snprintf(bufferMinutes, 5, "%02d", myTime.minutes);
+    snprintf(bufferHours, 5, "%d", myTime.hours);
     
     static char buffer[] = "00000:00:00";
-    snprintf(buffer, 11, "%s:%s:%s", bufferHours, bufferMinutes, bufferSeconds);
+    snprintf(buffer, 14, "%s:%s:%s", bufferHours, bufferMinutes, bufferSeconds);
     
     text_layer_set_text(mytimer_text_layer, buffer);
+}
+
+MyTime counterToMyTime(int counter, int interval) {
+    MyTime result;
+    
+    result.milliseconds = (counter * interval) % 1000;
+    result.seconds = (counter * interval / 1000) % 60;
+    result.minutes = (counter * interval / 60000) % 60;
+    result.hours = (counter * interval / 3600000);
+    
+    return result;
 }

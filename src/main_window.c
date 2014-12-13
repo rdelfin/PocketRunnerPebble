@@ -15,7 +15,7 @@ static BitmapLayer *s_middle_button_layer;
 static BitmapLayer *s_bottom_button_layer;
 static TextLayer *s_timer_text_layer;
 static TextLayer *s_lap_text_layer;
-static TextLayer *s_completed_text_layer;
+static TextLayer *s_remaining_text_label;
 
 static void initialise_ui(void) {
   s_window = window_create();
@@ -49,6 +49,7 @@ static void initialise_ui(void) {
   
   // s_timer_text_layer
   s_timer_text_layer = text_layer_create(GRect(0, 20, 127, 30));
+  text_layer_set_background_color(s_timer_text_layer, GColorClear);
   text_layer_set_text(s_timer_text_layer, "0:00:00");
   text_layer_set_text_alignment(s_timer_text_layer, GTextAlignmentCenter);
   text_layer_set_font(s_timer_text_layer, s_res_vcr_osd_numeric_24);
@@ -56,17 +57,19 @@ static void initialise_ui(void) {
   
   // s_lap_text_layer
   s_lap_text_layer = text_layer_create(GRect(0, 60, 127, 20));
+  text_layer_set_background_color(s_lap_text_layer, GColorClear);
   text_layer_set_text(s_lap_text_layer, "0 laps");
   text_layer_set_text_alignment(s_lap_text_layer, GTextAlignmentCenter);
   text_layer_set_font(s_lap_text_layer, s_res_vcr_osd_alphanumeric_20);
   layer_add_child(window_get_root_layer(s_window), (Layer *)s_lap_text_layer);
   
-  // s_completed_text_layer
-  s_completed_text_layer = text_layer_create(GRect(0, 110, 127, 20));
-  text_layer_set_text(s_completed_text_layer, "00km/00km");
-  text_layer_set_text_alignment(s_completed_text_layer, GTextAlignmentCenter);
-  text_layer_set_font(s_completed_text_layer, s_res_vcr_osd_alphanumeric_20);
-  layer_add_child(window_get_root_layer(s_window), (Layer *)s_completed_text_layer);
+  // s_remaining_text_label
+  s_remaining_text_label = text_layer_create(GRect(0, 100, 127, 50));
+  text_layer_set_background_color(s_remaining_text_label, GColorClear);
+  text_layer_set_text(s_remaining_text_label, "00.00km/ 00.00km");
+  text_layer_set_text_alignment(s_remaining_text_label, GTextAlignmentCenter);
+  text_layer_set_font(s_remaining_text_label, s_res_vcr_osd_alphanumeric_20);
+  layer_add_child(window_get_root_layer(s_window), (Layer *)s_remaining_text_label);
 }
 
 static void destroy_ui(void) {
@@ -77,7 +80,7 @@ static void destroy_ui(void) {
   bitmap_layer_destroy(s_bottom_button_layer);
   text_layer_destroy(s_timer_text_layer);
   text_layer_destroy(s_lap_text_layer);
-  text_layer_destroy(s_completed_text_layer);
+  text_layer_destroy(s_remaining_text_label);
   gbitmap_destroy(s_res_right_bar_img);
   gbitmap_destroy(s_res_top_button_img);
   gbitmap_destroy(s_res_middle_button_img);
@@ -108,4 +111,22 @@ void hide_main_window(void) {
 void setup_ui_actions(void) {
     mytimer_set_text_label(s_timer_text_layer);
     mytimer_start_timer();
+}
+
+void set_remaing_text(char* text) {
+    text_layer_set_text(s_remaining_text_label, text);
+}
+
+void main_window_update_values(double lapLength, char* units, bool useDistanceForAlarm, double endDistance, long endTime, int lapCount) {
+    char* lapCountBuffer = malloc(sizeof(char) * 10);
+    char* completeDistanceBuffer = malloc(sizeof(char) * 20);
+    
+    double distanceRan = lapCount * lapLength;
+    
+    snprintf(lapCountBuffer, 10, "%d lap%s", lapCount, ((lapCount == 1) ? "" : "s"));
+    snprintf(completeDistanceBuffer, 20, "%d.%02d%s/ %d.%02d%s", (int)distanceRan, ((int)(distanceRan * 100) % 100), units, (int)endDistance, ((int)(endDistance * 100) % 100), units);
+    
+    text_layer_set_text(s_lap_text_layer, lapCountBuffer);
+    text_layer_set_text(s_remaining_text_label, completeDistanceBuffer);
+    
 }

@@ -3,19 +3,19 @@
     "capabilities": [
         ""
     ],
-    "companyName": "ricardo.delfin.garcia@gmail.co",
+    "companyName": "Fox Tail Games",
     "longName": "Pocket Runner",
     "projectType": "native",
     "resources": {
         "media": [
             {
-                "characterRegex": "[\\/0-9a-zA-Z:. ]",
+                "characterRegex": "[\\/0-9a-zA-Z:\\. ]",
                 "file": "fonts/VCR_OSD_MONO.ttf",
                 "name": "VCR_OSD_ALPHANUMERIC_20",
                 "type": "font"
             },
             {
-                "characterRegex": "[0-9:. ]",
+                "characterRegex": "[0-9:\\.]",
                 "file": "fonts/VCR_OSD_MONO.ttf",
                 "name": "VCR_OSD_NUMERIC_24",
                 "type": "font"

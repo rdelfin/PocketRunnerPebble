@@ -1,6 +1,16 @@
 #include <pebble.h>
 
 #pragma once
+    
+#define INTERVAL_TIME 100
+    
+//Time struct
+typedef struct  {
+    int milliseconds;
+    int seconds;
+    int minutes;
+    int hours;
+} MyTime;
 
 static TextLayer* mytimer_text_layer;
 
@@ -9,11 +19,15 @@ void mytimer_set_text_label(TextLayer*);
 
 //All these methods may be called at will. It is not recommended that the timer_callback method is called
 void mytimer_timer_callback(void* data);
-void mytimer_set_timer_text(int seconds, int minutes, int hours);
+void mytimer_set_timer_text(MyTime myTime);
 void mytimer_start_timer();
 void mytimer_stop_timer();
+void mytimer_resume_timer();
+
+MyTime counterToMyTime(int counter, int interval);
 
 
 static AppTimer *mytimer_timer;
 static int mytimer_count;
 static bool mytimer_runTimer;
+

@@ -1,9 +1,12 @@
 #include <pebble.h>
-#include <time.h>
-#include "mytimer.h"
 #include "main_window.h"
+#include "app_communication.h"
 
 int main(void) {
-  show_main_window();
-  app_event_loop();
+    //Setup
+    show_main_window();
+    setup_app_communications();
+    
+    //App loop
+    app_event_loop();
 }
