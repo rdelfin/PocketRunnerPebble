@@ -88,7 +88,15 @@ void app_communications_inbox_received_callback(DictionaryIterator *iterator, vo
             case END_TIME_KEY:
                 endTime = t->value->int32;
                 break;
-            //DEFAULT CASE DOES NOTHING
+            case LAP_ADD_MSG_PHONE_KEY:
+                add_lap();
+                break;
+            case PAUSE_TIME_PEBBLE_KEY:
+                mytimer_stop_timer();
+                mytimer_set_time(t->value->int32);
+                break;
+            default:
+                APP_LOG(APP_LOG_LEVEL_DEBUG, "UNKNOWN TUPLE KEY RECIEVED: %d", (int)t->key);
         }
         t = dict_read_next(iterator);
     }

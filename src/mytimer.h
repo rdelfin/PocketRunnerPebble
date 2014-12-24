@@ -25,6 +25,7 @@ void mytimer_stop_timer();
 void mytimer_resume_timer();
 int mytimer_get_mill_count();
 bool mytimer_running();
+void mytimer_set_time(int32_t time);
 
 MyTime counterToMyTime(int counter, int interval);
 

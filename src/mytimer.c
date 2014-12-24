@@ -10,7 +10,7 @@ void mytimer_set_text_label(TextLayer* text_layer) {
     
 void mytimer_start_timer() {
     mytimer_resume_timer();
-    mytimer_count = 0;
+    mytimer_set_time(0);
 }
 
 void mytimer_stop_timer() {
@@ -68,3 +68,5 @@ int mytimer_get_mill_count()
 }
 
 bool mytimer_running() { return mytimer_runTimer; }
+
+void mytimer_set_time(int32_t time) { mytimer_count = time; }
