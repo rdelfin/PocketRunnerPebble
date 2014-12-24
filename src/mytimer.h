@@ -23,6 +23,8 @@ void mytimer_set_timer_text(MyTime myTime);
 void mytimer_start_timer();
 void mytimer_stop_timer();
 void mytimer_resume_timer();
+int mytimer_get_mill_count();
+bool mytimer_running();
 
 MyTime counterToMyTime(int counter, int interval);
 

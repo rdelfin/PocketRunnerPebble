@@ -1,4 +1,5 @@
 #include "main_window.h"
+#include "click_handlers.h"
 #include <pebble.h>
 
 // BEGIN AUTO-GENERATED UI CODE; DO NOT MODIFY
@@ -95,22 +96,23 @@ static void handle_window_unload(Window* window) {
 }
 
 void show_main_window(void) {
-  initialise_ui();
-  window_set_window_handlers(s_window, (WindowHandlers) {
-    .unload = handle_window_unload,
-  });
-  window_stack_push(s_window, true);
+    initialise_ui();
+    window_set_window_handlers(s_window, (WindowHandlers) {
+        .unload = handle_window_unload,
+    });
+    window_stack_push(s_window, true);
     
     setup_ui_actions();
 }
 
 void hide_main_window(void) {
-  window_stack_remove(s_window, true);
+    window_stack_remove(s_window, true);
 }
 
 void setup_ui_actions(void) {
+    window_set_click_config_provider(s_window, click_config_provider);
     mytimer_set_text_label(s_timer_text_layer);
-    mytimer_start_timer();
+    //mytimer_start_timer();
 }
 
 void set_remaing_text(char* text) {

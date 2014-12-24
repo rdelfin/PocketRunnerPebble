@@ -3,6 +3,9 @@
 
 void mytimer_set_text_label(TextLayer* text_layer) {
     mytimer_text_layer = text_layer;
+    
+    //initial setup
+    mytimer_runTimer = false;
 }
     
 void mytimer_start_timer() {
@@ -43,7 +46,7 @@ void mytimer_set_timer_text(MyTime myTime) {
     snprintf(bufferHours, 5, "%d", myTime.hours);
     
     static char buffer[] = "00000:00:00";
-    snprintf(buffer, 14, "%s:%s:%s", bufferHours, bufferMinutes, bufferSeconds);
+    snprintf(buffer, sizeof(buffer) / sizeof(char), "%s:%s:%s", bufferHours, bufferMinutes, bufferSeconds);
     
     text_layer_set_text(mytimer_text_layer, buffer);
 }
@@ -58,3 +61,10 @@ MyTime counterToMyTime(int counter, int interval) {
     
     return result;
 }
+
+int mytimer_get_mill_count()
+{
+    return mytimer_count;
+}
+
+bool mytimer_running() { return mytimer_runTimer; }

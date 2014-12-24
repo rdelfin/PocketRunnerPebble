@@ -2,6 +2,7 @@
 #include "app_communication.h"
 #include "main_window.h"
 #include "pebble_atof.h"
+#include "mytimer.h"
 
 //DEFINES FOR MESSAGES    
 #define LAP_LENGTH_KEY 0
@@ -9,10 +10,12 @@
 #define USE_DISTANCE_ALARM_KEY 2
 #define END_DISTANCE_KEY 3
 #define END_TIME_KEY 4
-#define LAP_ADD_PEBBLE_KEY 5
-#define LAP_ADD_PHONE_KEY 6
-#define PAUSE_PEBBLE_KEY 7
-#define PAUSE_PHONE_KEY 8
+
+    
+#define LAP_ADD_TIME_PEBBLE_KEY 5
+#define LAP_ADD_MSG_PHONE_KEY 6
+#define PAUSE_TIME_PEBBLE_KEY 7
+#define PAUSE_TIME_PHONE_KEY 8
 
 static double lapLength;
 static char* units;
@@ -37,6 +40,34 @@ void setup_app_communications() {
     lapCount = 0;
 }
 
+//Methods to be used by buttons/click handlers
+void send_pause(int32_t time)
+{
+    DictionaryIterator *iter;
+    app_message_outbox_begin(&iter);
+    
+    Tuplet timeVal = TupletInteger(LAP_ADD_TIME_PEBBLE_KEY, (int32_t)time);
+    dict_write_tuplet(iter, &timeVal);
+    
+    dict_write_end(iter);
+    
+    app_message_outbox_send();
+}
+
+void send_lap(int32_t time)
+{
+    DictionaryIterator *iter;
+    app_message_outbox_begin(&iter);
+    
+    Tuplet timeVal = TupletInteger(PAUSE_TIME_PEBBLE_KEY, (int32_t)time);
+    dict_write_tuplet(iter, &timeVal);
+    
+    dict_write_end(iter);
+    
+    app_message_outbox_send();
+}
+
+
 void app_communications_inbox_received_callback(DictionaryIterator *iterator, void *context) {
     Tuple *t = dict_read_first(iterator);
     
@@ -57,9 +88,7 @@ void app_communications_inbox_received_callback(DictionaryIterator *iterator, vo
             case END_TIME_KEY:
                 endTime = t->value->int32;
                 break;
-            case LAP_ADD_PHONE_KEY:
-                lapCount = t->value->int16;
-                break;
+            //DEFAULT CASE DOES NOTHING
         }
         t = dict_read_next(iterator);
     }
@@ -79,4 +108,11 @@ void app_communications_outbox_failed_callback(DictionaryIterator *iterator, App
 
 void app_communications_outbox_sent_callback(DictionaryIterator *iterator, void *context) {
     APP_LOG(APP_LOG_LEVEL_INFO, "Outbox send success!");
+}
+
+
+void add_lap()
+{
+    lapCount++;
+    main_window_update_values(lapLength, units, useDistanceForAlarm, endDistance, endTime, lapCount);
 }
