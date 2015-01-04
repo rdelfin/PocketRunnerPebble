@@ -24,6 +24,35 @@ static double endDistance;
 static int endTime;
 static int lapCount;
 
+static AppMessageResult results[] = {APP_MSG_OK, APP_MSG_SEND_TIMEOUT, APP_MSG_SEND_REJECTED,
+                                     APP_MSG_NOT_CONNECTED, APP_MSG_APP_NOT_RUNNING, APP_MSG_INVALID_ARGS,
+                                     APP_MSG_BUSY, APP_MSG_BUFFER_OVERFLOW, APP_MSG_ALREADY_RELEASED,
+                                     APP_MSG_CALLBACK_ALREADY_REGISTERED, APP_MSG_CALLBACK_NOT_REGISTERED,
+                                     APP_MSG_OUT_OF_MEMORY, APP_MSG_CLOSED, APP_MSG_INTERNAL_ERROR};
+static char* resultsString[] = {"APP_MESSAGE_OK", "APP_MSG_SEND_TIMEOUT", "APP_MSG_SEND_REJECTED",
+                                "APP_MSG_NOT_CONNECTED", "APP_MSG_APP_NOT_RUNNING", "APP_MSG_INVALID_ARGS",
+                                "APP_MSG_BUSY", "APP_MSG_BUFFER_OVERFLOW", "APP_MSG_ALREADY_RELEASED",
+                                "APP_MSG_CALLBACK_ALREADY_REGISTERED", "APP_MSG_CALLBACK_NOT_REGISTERED",
+                                "APP_MSG_OUT_OF_MEMORY", "APP_MSG_CLOSED", "APP_MSG_INTERNAL_ERROR"};
+
+void print_app_message_log(AppMessageResult result) {
+    char message[40];
+    
+    unsigned int i = 0;
+    bool found = false;
+    for(i = 0; i < sizeof(results) / sizeof(AppMessageResult); i++) {
+        if(results[i] == result) {
+            found = true;
+            strcpy(message, resultsString[i]);
+        }
+    }
+    
+    if(!found) {
+        snprintf(message, 39, "%u", result);
+    }
+    
+    APP_LOG(APP_LOG_LEVEL_INFO, "AppMessageResult: %s", message);
+}
 
 void setup_app_communications() {
     app_message_open(app_message_inbox_size_maximum(), app_message_outbox_size_maximum());
@@ -51,7 +80,9 @@ void send_pause(int32_t time)
     
     dict_write_end(iter);
     
-    app_message_outbox_send();
+    AppMessageResult result = app_message_outbox_send();
+    APP_LOG(APP_LOG_LEVEL_INFO, "PAUSE SENDING...");
+    print_app_message_log(result);
 }
 
 void send_lap(int32_t time)
@@ -64,7 +95,9 @@ void send_lap(int32_t time)
     
     dict_write_end(iter);
     
-    app_message_outbox_send();
+    AppMessageResult result = app_message_outbox_send();
+    APP_LOG(APP_LOG_LEVEL_INFO, "LAP SENDING...");
+    print_app_message_log(result);
 }
 
 
@@ -96,22 +129,25 @@ void app_communications_inbox_received_callback(DictionaryIterator *iterator, vo
                 mytimer_set_time(t->value->int32);
                 break;
             default:
-                APP_LOG(APP_LOG_LEVEL_DEBUG, "UNKNOWN TUPLE KEY RECIEVED: %d", (int)t->key);
+                APP_LOG(APP_LOG_LEVEL_WARNING, "UNKNOWN TUPLE KEY RECIEVED: %d", (int)t->key);
         }
         t = dict_read_next(iterator);
     }
     
     main_window_update_values(lapLength, units, useDistanceForAlarm, endDistance, endTime, lapCount);
+    show_no_connection_message(false);
     
     APP_LOG(APP_LOG_LEVEL_INFO, "Message received!");
 }
 
 void app_communications_inbox_dropped_callback(AppMessageResult reason, void *context) {
     APP_LOG(APP_LOG_LEVEL_ERROR, "Message dropped!");
+    print_app_message_log(reason);
 }
 
 void app_communications_outbox_failed_callback(DictionaryIterator *iterator, AppMessageResult reason, void *context) {
     APP_LOG(APP_LOG_LEVEL_ERROR, "Outbox send failed!");
+    print_app_message_log(reason);
 }
 
 void app_communications_outbox_sent_callback(DictionaryIterator *iterator, void *context) {

@@ -10,6 +10,7 @@ static GBitmap *s_res_middle_button_img;
 static GBitmap *s_res_bottom_button_img;
 static GFont s_res_vcr_osd_numeric_24;
 static GFont s_res_vcr_osd_alphanumeric_20;
+static GFont s_res_gothic_24_bold;
 static BitmapLayer *s_right_bar_layer;
 static BitmapLayer *s_top_button_layer;
 static BitmapLayer *s_middle_button_layer;
@@ -17,6 +18,7 @@ static BitmapLayer *s_bottom_button_layer;
 static TextLayer *s_timer_text_layer;
 static TextLayer *s_lap_text_layer;
 static TextLayer *s_remaining_text_label;
+static TextLayer *s_no_connection_message;
 
 static void initialise_ui(void) {
   s_window = window_create();
@@ -28,6 +30,7 @@ static void initialise_ui(void) {
   s_res_bottom_button_img = gbitmap_create_with_resource(RESOURCE_ID_BOTTOM_BUTTON_IMG);
   s_res_vcr_osd_numeric_24 = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_VCR_OSD_NUMERIC_24));
   s_res_vcr_osd_alphanumeric_20 = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_VCR_OSD_ALPHANUMERIC_20));
+  s_res_gothic_24_bold = fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD);
   // s_right_bar_layer
   s_right_bar_layer = bitmap_layer_create(GRect(127, 0, 17, 168));
   bitmap_layer_set_bitmap(s_right_bar_layer, s_res_right_bar_img);
@@ -71,6 +74,13 @@ static void initialise_ui(void) {
   text_layer_set_text_alignment(s_remaining_text_label, GTextAlignmentCenter);
   text_layer_set_font(s_remaining_text_label, s_res_vcr_osd_alphanumeric_20);
   layer_add_child(window_get_root_layer(s_window), (Layer *)s_remaining_text_label);
+  
+  // s_no_connection_message
+  s_no_connection_message = text_layer_create(GRect(0, 57, 144, 51));
+  text_layer_set_text(s_no_connection_message, "No cellphone connection!");
+  text_layer_set_text_alignment(s_no_connection_message, GTextAlignmentCenter);
+  text_layer_set_font(s_no_connection_message, s_res_gothic_24_bold);
+  layer_add_child(window_get_root_layer(s_window), (Layer *)s_no_connection_message);
 }
 
 static void destroy_ui(void) {
@@ -82,6 +92,7 @@ static void destroy_ui(void) {
   text_layer_destroy(s_timer_text_layer);
   text_layer_destroy(s_lap_text_layer);
   text_layer_destroy(s_remaining_text_label);
+  text_layer_destroy(s_no_connection_message);
   gbitmap_destroy(s_res_right_bar_img);
   gbitmap_destroy(s_res_top_button_img);
   gbitmap_destroy(s_res_middle_button_img);
@@ -110,6 +121,7 @@ void hide_main_window(void) {
 }
 
 void setup_ui_actions(void) {
+    show_no_connection_message(true);
     window_set_click_config_provider(s_window, click_config_provider);
     mytimer_set_text_label(s_timer_text_layer);
     //mytimer_start_timer();
@@ -131,4 +143,16 @@ void main_window_update_values(double lapLength, char* units, bool useDistanceFo
     text_layer_set_text(s_lap_text_layer, lapCountBuffer);
     text_layer_set_text(s_remaining_text_label, completeDistanceBuffer);
     
+    
+}
+
+void show_no_connection_message(bool show) {
+    layer_set_hidden(text_layer_get_layer(s_no_connection_message), !show);
+    layer_set_hidden(text_layer_get_layer(s_remaining_text_label), show);
+    layer_set_hidden(text_layer_get_layer(s_lap_text_layer), show);
+    layer_set_hidden(text_layer_get_layer(s_timer_text_layer), show);
+    layer_set_hidden(bitmap_layer_get_layer(s_bottom_button_layer), show);
+    layer_set_hidden(bitmap_layer_get_layer(s_middle_button_layer), show);
+    layer_set_hidden(bitmap_layer_get_layer(s_top_button_layer), show);
+    layer_set_hidden(bitmap_layer_get_layer(s_right_bar_layer), show);
 }
