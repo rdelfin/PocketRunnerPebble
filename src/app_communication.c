@@ -103,23 +103,29 @@ void send_lap(int32_t time)
 
 void app_communications_inbox_received_callback(DictionaryIterator *iterator, void *context) {
     Tuple *t = dict_read_first(iterator);
+    unsigned short checkedFlags = 0;
     
     while(t != NULL) {
         switch(t->key) {
             case LAP_LENGTH_KEY:
                 lapLength = pebble_atof(t->value->cstring);
+                checkedFlags |= 1 << 0;
                 break;
             case UNITS_KEY:
                 units = t->value->cstring;
+                checkedFlags |= 1 << 1;
                 break;
             case USE_DISTANCE_ALARM_KEY:
                 useDistanceForAlarm = ((t->value->int8 == 0) ? false : true);
+                checkedFlags |= 1 << 2;
                 break;
             case END_DISTANCE_KEY:
                 endDistance = pebble_atof(t->value->cstring);
+                checkedFlags |= 1 << 3;
                 break;
             case END_TIME_KEY:
                 endTime = t->value->int32;
+                checkedFlags |= 1 << 4;
                 break;
             case LAP_ADD_MSG_PHONE_KEY:
                 add_lap();
@@ -135,7 +141,11 @@ void app_communications_inbox_received_callback(DictionaryIterator *iterator, vo
     }
     
     main_window_update_values(lapLength, units, useDistanceForAlarm, endDistance, endTime, lapCount);
-    show_no_connection_message(false);
+    
+    unsigned short fullChangeVal = 1 << 4 | 1 << 3 | 1 << 2 | 1 << 1 | 1 << 0;
+    if(checkedFlags == fullChangeVal) {
+        show_no_connection_message(false);
+    }
     
     APP_LOG(APP_LOG_LEVEL_INFO, "Message received!");
 }
