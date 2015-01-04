@@ -141,9 +141,7 @@ void main_window_update_values(double lapLength, char* units, bool useDistanceFo
     snprintf(completeDistanceBuffer, 20, "%d.%02d%s/ %d.%02d%s", (int)distanceRan, ((int)(distanceRan * 100) % 100), units, (int)endDistance, ((int)(endDistance * 100) % 100), units);
     
     text_layer_set_text(s_lap_text_layer, lapCountBuffer);
-    text_layer_set_text(s_remaining_text_label, completeDistanceBuffer);
-    
-    
+    text_layer_set_text(s_remaining_text_label, completeDistanceBuffer);   
 }
 
 void show_no_connection_message(bool show) {

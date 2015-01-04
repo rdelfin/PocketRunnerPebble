@@ -6,7 +6,9 @@
 //Done button
 void up_click_handler(ClickRecognizerRef recognizer, void *context)
 {
-    //Do nothing (for now...)
+    if(!mytimer_running()) {
+        send_run();
+    }
 }
 
 //Pause button
@@ -18,20 +20,13 @@ void select_click_handler(ClickRecognizerRef recognizer, void *context)
         mytimer_resume_timer();
     }
     
-    int32_t time = mytimer_get_mill_count();
-    
-    send_pause(time);
-    
     vibes_short_pulse();
 }
 
 //Lap button
 void down_click_handler(ClickRecognizerRef recognizer, void *context)
 {
-    int32_t time = mytimer_get_mill_count();
-    
     add_lap();
-    send_lap(time);
     
     vibes_short_pulse();
 }

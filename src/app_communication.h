@@ -7,7 +7,6 @@ void app_communications_inbox_dropped_callback(AppMessageResult reason, void *co
 void app_communications_outbox_failed_callback(DictionaryIterator *iterator, AppMessageResult reason, void *context);
 void app_communications_outbox_sent_callback(DictionaryIterator *iterator, void *context);
 
-void send_pause(int32_t time);
-void send_lap(int32_t time);
+void send_run();
 
 void add_lap();

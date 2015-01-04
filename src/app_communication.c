@@ -3,19 +3,24 @@
 #include "main_window.h"
 #include "pebble_atof.h"
 #include "mytimer.h"
+    
+//Method declaration
+void send_initial_request();
 
-//DEFINES FOR MESSAGES    
+/*==========================================================================
+ *====================== DEFINES FOR MESSAGES ==============================
+ *==========================================================================*/
+// Initial message (with lap length, units, etc.)
 #define LAP_LENGTH_KEY 0
 #define UNITS_KEY 1
 #define USE_DISTANCE_ALARM_KEY 2
 #define END_DISTANCE_KEY 3
 #define END_TIME_KEY 4
+#define REQUEST_INITIAL 5
 
-    
-#define LAP_ADD_TIME_PEBBLE_KEY 5
-#define LAP_ADD_MSG_PHONE_KEY 6
-#define PAUSE_TIME_PEBBLE_KEY 7
-#define PAUSE_TIME_PHONE_KEY 8
+// Send run to cellphone
+#define RUN_TIME 6
+#define RUN_LAPS 7
 
 static double lapLength;
 static char* units;
@@ -69,36 +74,24 @@ void setup_app_communications() {
     endTime = 0;
     lapCount = 0;
     checkedFlags = 0;
+    
+    send_initial_request();
 }
 
-//Methods to be used by buttons/click handlers
-void send_pause(int32_t time)
-{
+void send_run() {
     DictionaryIterator *iter;
     app_message_outbox_begin(&iter);
     
-    Tuplet timeVal = TupletInteger(LAP_ADD_TIME_PEBBLE_KEY, (int32_t)time);
+    Tuplet timeVal = TupletInteger(RUN_TIME, mytimer_get_mill_count());
+    Tuplet lapsVal = TupletInteger(RUN_LAPS, lapCount);
+    
     dict_write_tuplet(iter, &timeVal);
+    dict_write_tuplet(iter, &lapsVal);
     
     dict_write_end(iter);
     
     AppMessageResult result = app_message_outbox_send();
     APP_LOG(APP_LOG_LEVEL_INFO, "PAUSE SENDING...");
-    print_app_message_log(result);
-}
-
-void send_lap(int32_t time)
-{
-    DictionaryIterator *iter;
-    app_message_outbox_begin(&iter);
-    
-    Tuplet timeVal = TupletInteger(PAUSE_TIME_PEBBLE_KEY, (int32_t)time);
-    dict_write_tuplet(iter, &timeVal);
-    
-    dict_write_end(iter);
-    
-    AppMessageResult result = app_message_outbox_send();
-    APP_LOG(APP_LOG_LEVEL_INFO, "LAP SENDING...");
     print_app_message_log(result);
 }
 
@@ -128,13 +121,6 @@ void app_communications_inbox_received_callback(DictionaryIterator *iterator, vo
                 endTime = t->value->int32;
                 checkedFlags |= 1 << 4;
                 break;
-            case LAP_ADD_MSG_PHONE_KEY:
-                add_lap();
-                break;
-            case PAUSE_TIME_PEBBLE_KEY:
-                mytimer_stop_timer();
-                mytimer_set_time(t->value->int32);
-                break;
             default:
                 APP_LOG(APP_LOG_LEVEL_WARNING, "UNKNOWN TUPLE KEY RECIEVED: %d", (int)t->key);
         }
@@ -163,6 +149,21 @@ void app_communications_outbox_failed_callback(DictionaryIterator *iterator, App
 
 void app_communications_outbox_sent_callback(DictionaryIterator *iterator, void *context) {
     APP_LOG(APP_LOG_LEVEL_INFO, "Outbox send success!");
+}
+
+void send_initial_request() {
+    DictionaryIterator *iter;
+    app_message_outbox_begin(&iter);
+    
+    Tuplet request = TupletInteger(REQUEST_INITIAL, 0);
+    
+    dict_write_tuplet(iter, &request);
+    
+    dict_write_end(iter);
+    
+    AppMessageResult result = app_message_outbox_send();
+    APP_LOG(APP_LOG_LEVEL_INFO, "PAUSE SENDING...");
+    print_app_message_log(result);
 }
 
 
