@@ -23,6 +23,7 @@ static bool useDistanceForAlarm;
 static double endDistance;
 static int endTime;
 static int lapCount;
+static unsigned short checkedFlags;
 
 static AppMessageResult results[] = {APP_MSG_OK, APP_MSG_SEND_TIMEOUT, APP_MSG_SEND_REJECTED,
                                      APP_MSG_NOT_CONNECTED, APP_MSG_APP_NOT_RUNNING, APP_MSG_INVALID_ARGS,
@@ -67,6 +68,7 @@ void setup_app_communications() {
     endDistance = 0;
     endTime = 0;
     lapCount = 0;
+    checkedFlags = 0;
 }
 
 //Methods to be used by buttons/click handlers
@@ -103,7 +105,6 @@ void send_lap(int32_t time)
 
 void app_communications_inbox_received_callback(DictionaryIterator *iterator, void *context) {
     Tuple *t = dict_read_first(iterator);
-    unsigned short checkedFlags = 0;
     
     while(t != NULL) {
         switch(t->key) {
@@ -142,7 +143,7 @@ void app_communications_inbox_received_callback(DictionaryIterator *iterator, vo
     
     main_window_update_values(lapLength, units, useDistanceForAlarm, endDistance, endTime, lapCount);
     
-    unsigned short fullChangeVal = 1 << 4 | 1 << 3 | 1 << 2 | 1 << 1 | 1 << 0;
+    static const unsigned short fullChangeVal = 1 << 4 | 1 << 3 | 1 << 2 | 1 << 1 | 1 << 0;
     if(checkedFlags == fullChangeVal) {
         show_no_connection_message(false);
     }
