@@ -2,7 +2,7 @@
 #include "click_handlers.h"
 #include "mytimer.h"
 #include "app_communication.h"
-
+    
 //Done button
 void up_click_handler(ClickRecognizerRef recognizer, void *context)
 {

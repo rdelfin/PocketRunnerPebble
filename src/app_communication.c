@@ -3,24 +3,11 @@
 #include "main_window.h"
 #include "pebble_atof.h"
 #include "mytimer.h"
+#include "message_keys.h"
+#include "run_sender.h"
     
 //Method declaration
 void send_initial_request();
-
-/*==========================================================================
- *====================== DEFINES FOR MESSAGES ==============================
- *==========================================================================*/
-// Initial message (with lap length, units, etc.)
-#define LAP_LENGTH_KEY 0
-#define UNITS_KEY 1
-#define USE_DISTANCE_ALARM_KEY 2
-#define END_DISTANCE_KEY 3
-#define END_TIME_KEY 4
-#define REQUEST_INITIAL 5
-
-// Send run to cellphone
-#define RUN_TIME 6
-#define RUN_LAPS 7
 
 static double lapLength;
 static char* units;
@@ -28,6 +15,7 @@ static bool useDistanceForAlarm;
 static double endDistance;
 static int endTime;
 static int lapCount;
+static int* lapTimes = NULL;
 static unsigned short checkedFlags;
 
 static AppMessageResult results[] = {APP_MSG_OK, APP_MSG_SEND_TIMEOUT, APP_MSG_SEND_REJECTED,
@@ -76,23 +64,6 @@ void setup_app_communications() {
     checkedFlags = 0;
     
     send_initial_request();
-}
-
-void send_run() {
-    DictionaryIterator *iter;
-    app_message_outbox_begin(&iter);
-    
-    Tuplet timeVal = TupletInteger(RUN_TIME, mytimer_get_mill_count());
-    Tuplet lapsVal = TupletInteger(RUN_LAPS, lapCount);
-    
-    dict_write_tuplet(iter, &timeVal);
-    dict_write_tuplet(iter, &lapsVal);
-    
-    dict_write_end(iter);
-    
-    AppMessageResult result = app_message_outbox_send();
-    APP_LOG(APP_LOG_LEVEL_INFO, "PAUSE SENDING...");
-    print_app_message_log(result);
 }
 
 
@@ -149,6 +120,14 @@ void app_communications_outbox_failed_callback(DictionaryIterator *iterator, App
 
 void app_communications_outbox_sent_callback(DictionaryIterator *iterator, void *context) {
     APP_LOG(APP_LOG_LEVEL_INFO, "Outbox send success!");
+    
+    Tuple* openTuple = dict_find(iterator, RUN_OPEN);
+    Tuple* timeTuple = dict_find(iterator, RUN_TIME);
+    Tuple* lapTimeTuple = dict_find(iterator, RUN_LAP_TIME);
+    
+    if(openTuple != NULL || timeTuple != NULL || lapTimeTuple != NULL) {
+        send_run_decide_action(lapTimes, mytimer_get_mill_count(), lapCount);
+    }
 }
 
 void send_initial_request() {
@@ -162,13 +141,26 @@ void send_initial_request() {
     dict_write_end(iter);
     
     AppMessageResult result = app_message_outbox_send();
-    APP_LOG(APP_LOG_LEVEL_INFO, "PAUSE SENDING...");
+    APP_LOG(APP_LOG_LEVEL_INFO, "INITIAL REQUEST SENDING...");
     print_app_message_log(result);
 }
 
 
 void add_lap()
 {
+    int time = mytimer_get_mill_count();
+    
+    lapTimes = realloc(lapTimes, sizeof(int)*(lapCount + 1));
+    
+    //Add newest time
+    lapTimes[lapCount] = time;
+    
     lapCount++;
     main_window_update_values(lapLength, units, useDistanceForAlarm, endDistance, endTime, lapCount);
+}
+
+void send_run() {
+    if(lapCount > 0 && mytimer_get_mill_count() > 0) {
+        send_open_run();
+    }
 }
