@@ -92,6 +92,10 @@ void app_communications_inbox_received_callback(DictionaryIterator *iterator, vo
                 endTime = t->value->int32;
                 checkedFlags |= 1 << 4;
                 break;
+            case RUN_UUID_DEFINE:
+                setuuid(t->value->data);
+                send_run_decide_action(lapTimes, mytimer_get_mill_count(), lapCount);
+                break;
             default:
                 APP_LOG(APP_LOG_LEVEL_WARNING, "UNKNOWN TUPLE KEY RECIEVED: %d", (int)t->key);
         }
@@ -121,11 +125,10 @@ void app_communications_outbox_failed_callback(DictionaryIterator *iterator, App
 void app_communications_outbox_sent_callback(DictionaryIterator *iterator, void *context) {
     APP_LOG(APP_LOG_LEVEL_INFO, "Outbox send success!");
     
-    Tuple* openTuple = dict_find(iterator, RUN_OPEN);
     Tuple* timeTuple = dict_find(iterator, RUN_TIME);
     Tuple* lapTimeTuple = dict_find(iterator, RUN_LAP_TIME);
     
-    if(openTuple != NULL || timeTuple != NULL || lapTimeTuple != NULL) {
+    if(timeTuple != NULL || lapTimeTuple != NULL) {
         send_run_decide_action(lapTimes, mytimer_get_mill_count(), lapCount);
     }
 }

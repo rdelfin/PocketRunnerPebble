@@ -13,7 +13,9 @@
 
 // Send run to cellphone
 #define RUN_OPEN 6
-#define RUN_TIME 7
-#define RUN_LAPS 8
-#define RUN_LAP_TIME 9
-#define RUN_CLOSE 10
+#define RUN_UUID_DEFINE 7
+#define RUN_TIME 8
+#define RUN_LAPS 9
+#define RUN_LAP_TIME 10
+#define RUN_UUID_ACK 11
+#define RUN_CLOSE 12
