@@ -74,7 +74,7 @@ void send_close_run() {
     dict_write_end(iter);
     
     AppMessageResult result = app_message_outbox_send();
-    APP_LOG(APP_LOG_LEVEL_INFO, "OPEN RUN SENDING...");
+    APP_LOG(APP_LOG_LEVEL_INFO, "CLOSE RUN SENDING...");
     print_app_message_log(result);
 }
 
