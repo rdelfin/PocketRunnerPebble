@@ -77,7 +77,7 @@ static void initialise_ui(void) {
   
   // s_no_connection_message
   s_no_connection_message = text_layer_create(GRect(0, 57, 144, 51));
-  text_layer_set_text(s_no_connection_message, "No cellphone connection!");
+  text_layer_set_text(s_no_connection_message, "Error message!");
   text_layer_set_text_alignment(s_no_connection_message, GTextAlignmentCenter);
   text_layer_set_font(s_no_connection_message, s_res_gothic_24_bold);
   layer_add_child(window_get_root_layer(s_window), (Layer *)s_no_connection_message);
@@ -121,7 +121,7 @@ void hide_main_window(void) {
 }
 
 void setup_ui_actions(void) {
-    show_no_connection_message(true);
+    show_no_connection_message(true, "No cellphone connection!");
     window_set_click_config_provider(s_window, click_config_provider);
     mytimer_set_text_label(s_timer_text_layer);
     //mytimer_start_timer();
@@ -144,7 +144,8 @@ void main_window_update_values(double lapLength, char* units, bool useDistanceFo
     text_layer_set_text(s_remaining_text_label, completeDistanceBuffer);   
 }
 
-void show_no_connection_message(bool show) {
+void show_no_connection_message(bool show, char* text) {
+    text_layer_set_text(s_no_connection_message, text);
     layer_set_hidden(text_layer_get_layer(s_no_connection_message), !show);
     layer_set_hidden(text_layer_get_layer(s_remaining_text_label), show);
     layer_set_hidden(text_layer_get_layer(s_lap_text_layer), show);

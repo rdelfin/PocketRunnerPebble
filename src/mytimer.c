@@ -32,9 +32,13 @@ void mytimer_timer_callback(void* data) {
         
         //Only update every second
         if(mytimer_count % (1000 / INTERVAL_TIME) == 0) {
-            mytimer_set_timer_text(counterToMyTime(mytimer_count, INTERVAL_TIME));
+            mytimer_update_label();
         }
     }
+}
+
+void mytimer_update_label() {
+    mytimer_set_timer_text(counterToMyTime(mytimer_count, INTERVAL_TIME));
 }
 
 void mytimer_set_timer_text(MyTime myTime) {
@@ -64,7 +68,7 @@ MyTime counterToMyTime(int counter, int interval) {
 
 int mytimer_get_mill_count()
 {
-    return mytimer_count;
+    return mytimer_count * INTERVAL_TIME;
 }
 
 bool mytimer_running() { return mytimer_runTimer; }

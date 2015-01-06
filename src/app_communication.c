@@ -5,6 +5,7 @@
 #include "mytimer.h"
 #include "message_keys.h"
 #include "run_sender.h"
+#include "click_handlers.h"
     
 //Method declaration
 void send_initial_request();
@@ -114,7 +115,8 @@ void app_communications_inbox_received_callback(DictionaryIterator *iterator, vo
     
     static const unsigned short fullChangeVal = 1 << 4 | 1 << 3 | 1 << 2 | 1 << 1 | 1 << 0;
     if(checkedFlags == fullChangeVal) {
-        show_no_connection_message(false);
+        activate_buttons();
+        show_no_connection_message(false, "");
     }
     
 }
@@ -135,6 +137,7 @@ void app_communications_outbox_sent_callback(DictionaryIterator *iterator, void 
     Tuple* openTuple = dict_find(iterator, RUN_OPEN);
     Tuple* timeTuple = dict_find(iterator, RUN_TIME);
     Tuple* lapTimeTuple = dict_find(iterator, RUN_LAP_TIME);
+    Tuple* closeTuple = dict_find(iterator, RUN_CLOSE);
     
     if(openTuple != NULL) {
         openAckArrived = true;
@@ -144,7 +147,13 @@ void app_communications_outbox_sent_callback(DictionaryIterator *iterator, void 
         APP_LOG(APP_LOG_LEVEL_INFO, "Deciding what to send next for run...");
         send_run_decide_action(lapTimes, mytimer_get_mill_count(), lapCount);
     }
-}
+    
+    if(closeTuple != NULL) {
+        activate_buttons();
+        show_no_connection_message(false, "");
+        reset_run();
+    }
+} 
 
 void send_initial_request() {
     DictionaryIterator *iter;
@@ -168,14 +177,13 @@ void add_lap()
     
     if(lapTimes == NULL) {
         lapTimes = malloc(sizeof(int)*(lapCount + 1));
+        lapTimes[lapCount] = time;
     } else {
         int* buffer = malloc(sizeof(int)*(lapCount + 1));
-        memcpy(lapTimes, buffer, sizeof(int)*lapCount);
+        memcpy(buffer, lapTimes, sizeof(int)*lapCount);
         lapTimes = buffer;
+        lapTimes[lapCount] = time - lapTimes[lapCount - 1];
     }
-       
-    //Add newest time
-    lapTimes[lapCount] = time;
     
     lapCount++;
     
@@ -188,4 +196,18 @@ void send_run() {
         openAckArrived = false;
         send_open_run();
     }
+}
+
+void reset_run() {
+    lapCount = 0;
+    free(lapTimes);
+    lapTimes = NULL;
+    checkedFlags = 0;
+    uuidArrived = false;
+    openAckArrived = false;
+    mytimer_stop_timer();
+    mytimer_set_time(0);
+    mytimer_update_label();
+    main_window_update_values(lapLength, units, useDistanceForAlarm, endDistance, endTime, lapCount);
+    send_initial_request();
 }

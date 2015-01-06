@@ -12,3 +12,5 @@ void app_communications_outbox_sent_callback(DictionaryIterator *iterator, void 
 void add_lap();
 
 void send_run();
+
+void reset_run();
