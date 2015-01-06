@@ -82,12 +82,15 @@ void send_close_run() {
 
 void send_run_decide_action(int times[], int time, int laps) {
     if(!initialDataSent) {
+        APP_LOG(APP_LOG_LEVEL_DEBUG, "Sending initial data");
         send_initial_run_data(time, laps);
         initialDataSent = true;
     } else if(lapCounter < laps) {
+        APP_LOG(APP_LOG_LEVEL_DEBUG, "Sending lap number %d", lapCounter);
         send_lap_time(lapCounter, times);
         lapCounter++;
     } else if(!runClosed) {
+        APP_LOG(APP_LOG_LEVEL_DEBUG, "Sending close");
         send_close_run();
     }
 }

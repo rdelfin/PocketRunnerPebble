@@ -68,6 +68,8 @@ void setup_app_communications() {
 
 
 void app_communications_inbox_received_callback(DictionaryIterator *iterator, void *context) {
+    APP_LOG(APP_LOG_LEVEL_INFO, "Message received!");
+    
     Tuple *t = dict_read_first(iterator);
     
     while(t != NULL) {
@@ -93,6 +95,7 @@ void app_communications_inbox_received_callback(DictionaryIterator *iterator, vo
                 checkedFlags |= 1 << 4;
                 break;
             case RUN_UUID_DEFINE:
+                APP_LOG(APP_LOG_LEVEL_DEBUG, "UUID Define recieved");
                 setuuid(t->value->data);
                 send_run_decide_action(lapTimes, mytimer_get_mill_count(), lapCount);
                 break;
@@ -109,7 +112,6 @@ void app_communications_inbox_received_callback(DictionaryIterator *iterator, vo
         show_no_connection_message(false);
     }
     
-    APP_LOG(APP_LOG_LEVEL_INFO, "Message received!");
 }
 
 void app_communications_inbox_dropped_callback(AppMessageResult reason, void *context) {
@@ -129,6 +131,7 @@ void app_communications_outbox_sent_callback(DictionaryIterator *iterator, void 
     Tuple* lapTimeTuple = dict_find(iterator, RUN_LAP_TIME);
     
     if(timeTuple != NULL || lapTimeTuple != NULL) {
+        APP_LOG(APP_LOG_LEVEL_INFO, "Deciding what to send next for run...");
         send_run_decide_action(lapTimes, mytimer_get_mill_count(), lapCount);
     }
 }
@@ -153,12 +156,19 @@ void add_lap()
 {
     int time = mytimer_get_mill_count();
     
-    lapTimes = realloc(lapTimes, sizeof(int)*(lapCount + 1));
-    
+    if(lapTimes == NULL) {
+        lapTimes = malloc(sizeof(int)*(lapCount + 1));
+    } else {
+        int* buffer = malloc(sizeof(int)*(lapCount + 1));
+        memcpy(lapTimes, buffer, sizeof(int)*lapCount);
+        lapTimes = buffer;
+    }
+       
     //Add newest time
     lapTimes[lapCount] = time;
     
     lapCount++;
+    
     main_window_update_values(lapLength, units, useDistanceForAlarm, endDistance, endTime, lapCount);
 }
 
