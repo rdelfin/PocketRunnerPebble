@@ -17,6 +17,8 @@ static int endTime;
 static int lapCount;
 static int* lapTimes = NULL;
 static unsigned short checkedFlags;
+static bool uuidArrived;
+static bool openAckArrived;
 
 static AppMessageResult results[] = {APP_MSG_OK, APP_MSG_SEND_TIMEOUT, APP_MSG_SEND_REJECTED,
                                      APP_MSG_NOT_CONNECTED, APP_MSG_APP_NOT_RUNNING, APP_MSG_INVALID_ARGS,
@@ -96,8 +98,11 @@ void app_communications_inbox_received_callback(DictionaryIterator *iterator, vo
                 break;
             case RUN_UUID_DEFINE:
                 APP_LOG(APP_LOG_LEVEL_DEBUG, "UUID Define recieved");
+                uuidArrived = true;
                 setuuid(t->value->data);
-                send_run_decide_action(lapTimes, mytimer_get_mill_count(), lapCount);
+                if(openAckArrived) {
+                    send_run_decide_action(lapTimes, mytimer_get_mill_count(), lapCount);
+                }
                 break;
             default:
                 APP_LOG(APP_LOG_LEVEL_WARNING, "UNKNOWN TUPLE KEY RECIEVED: %d", (int)t->key);
@@ -127,10 +132,15 @@ void app_communications_outbox_failed_callback(DictionaryIterator *iterator, App
 void app_communications_outbox_sent_callback(DictionaryIterator *iterator, void *context) {
     APP_LOG(APP_LOG_LEVEL_INFO, "Outbox send success!");
     
+    Tuple* openTuple = dict_find(iterator, RUN_OPEN);
     Tuple* timeTuple = dict_find(iterator, RUN_TIME);
     Tuple* lapTimeTuple = dict_find(iterator, RUN_LAP_TIME);
     
-    if(timeTuple != NULL || lapTimeTuple != NULL) {
+    if(openTuple != NULL) {
+        openAckArrived = true;
+    }
+    
+    if(timeTuple != NULL || lapTimeTuple != NULL || (openTuple != NULL && uuidArrived)) {
         APP_LOG(APP_LOG_LEVEL_INFO, "Deciding what to send next for run...");
         send_run_decide_action(lapTimes, mytimer_get_mill_count(), lapCount);
     }
@@ -174,6 +184,8 @@ void add_lap()
 
 void send_run() {
     if(lapCount > 0 && mytimer_get_mill_count() > 0) {
+        uuidArrived = false;
+        openAckArrived = false;
         send_open_run();
     }
 }
