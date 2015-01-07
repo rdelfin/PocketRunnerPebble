@@ -3,11 +3,17 @@
     "capabilities": [
         ""
     ],
-    "companyName": "Fox Tail Games",
+    "companyName": "Ricardo Delfin",
     "longName": "Pocket Runner",
     "projectType": "native",
     "resources": {
         "media": [
+            {
+                "file": "images/menuImage.png",
+                "menuIcon": true,
+                "name": "MENU_IMAGE",
+                "type": "png"
+            },
             {
                 "characterRegex": "[\\/0-9a-zA-Z:\\. ]",
                 "file": "fonts/VCR_OSD_MONO.ttf",
